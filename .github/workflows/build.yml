@@ -72,6 +72,7 @@ jobs:
 
     - name: Archive source tree
       run: |
+        rm -rf helix/target
         find helix -name .git -type d -print0 | xargs -0 rm -rf '{}'
         tar -acf helix.tar.zst helix/
 
