@@ -15,8 +15,6 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      CC: "gcc-13"
-      CXX: "g++-13"
       HELIX_DEFAULT_RUNTIME: "/opt/helix/runtime"
 
     steps:
