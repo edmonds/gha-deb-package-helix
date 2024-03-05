@@ -1,4 +1,4 @@
 Name: editor
 Link: /usr/bin/editor
-Alternative: /usr/bin/hx
+Alternative: /opt/helix/bin/hx
 Priority: 50
