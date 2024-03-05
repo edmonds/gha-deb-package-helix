@@ -1,0 +1,92 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+
+  schedule:
+    - cron: '0 0 * * 0' # Every Sunday at 00:00
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    env:
+      CC: "gcc-13"
+      CXX: "g++-13"
+      HELIX_DEFAULT_RUNTIME: "/opt/helix/runtime"
+
+    steps:
+    - name: Checkout gha-deb-package-helix
+      uses: actions/checkout@v4
+
+    - name: Checkout helix-editor/helix
+      uses: actions/checkout@v4
+      with:
+        repository: helix-editor/helix
+        path: helix
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y --no-install-recommends -V \
+          debhelper \
+        ;
+
+    - name: Build helix
+      working-directory: "./helix"
+      run: |
+        rm -vf rust-toolchain.toml
+        cargo build --profile opt --ignore-rust-version
+
+    - name: Prepare Debian packaging
+      run: |
+        VERSION="100:0+$(date +%Y%m%d)+git.$(git --git-dir=helix/.git rev-parse --short HEAD)"
+        echo "VERSION is $VERSION"
+        mkdir -p deb/helix/opt/helix/bin
+        mkdir -p deb/helix/opt/helix/runtime
+        cp -avl helix/target/opt/hx deb/helix/opt/helix/bin/
+        cp -avl helix/runtime/* deb/helix/opt/helix/runtime/
+        rm -rf deb/helix/opt/helix/runtime/grammars/sources/
+        find deb/helix -name .gitkeep -delete
+        cp -av .packaging/debian deb/helix/
+        sed \
+          -e "s,%VERSION%,$VERSION,g" \
+          -e "s/%USER%/$(whoami)/g" \
+          -e "s/%NODE%/$(uname -n)/g" \
+          -e "s/%DATE%/$(date -R)/g" \
+          ./deb/helix/debian/changelog.in > ./deb/helix/debian/changelog
+        cp helix/LICENSE deb/helix/debian/copyright
+
+    - name: Build Debian package
+      working-directory: "./deb/helix"
+      run: |
+        dpkg-buildpackage -B -us -uc
+
+    - name: Inspect Debian package
+      working-directory: "./deb"
+      run: |
+        dpkg-deb -I helix_*.deb
+        dpkg-deb -c helix_*.deb
+
+    - name: Archive source tree
+      run: |
+        find helix -name .git -type d -print0 | xargs -0 rm -rf '{}'
+        tar -acvf helix.tar.zst helix/
+
+    - name: Upload Debian package to artifact storage
+      uses: actions/upload-artifact@v4
+      with:
+        name: binary-helix-deb
+        path: deb/helix_*.deb
+        compression-level: 0
+
+    - name: Upload source tree to artifact storage
+      uses: actions/upload-artifact@v4
+      with:
+        name: source
+        path: helix.tar.zst
+        compression-level: 0
