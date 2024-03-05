@@ -1,0 +1,10 @@
+Source: helix
+Section: editors
+Priority: extra
+Maintainer: Robert Edmonds <edmonds@users.noreply.github.com>
+
+Package: helix
+Architecture: amd64
+Depends: ${shlibs:Depends}
+Description: Post-modern modal text editor
+ .

@@ -1,0 +1,5 @@
+helix (%VERSION%) UNRELEASED; urgency=low
+
+  * Automatic build.
+
+ -- Automatic Builder <%USER%@%NODE%>  %DATE%
