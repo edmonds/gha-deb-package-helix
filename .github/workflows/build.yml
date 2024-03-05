@@ -79,13 +79,13 @@ jobs:
     - name: Upload Debian package to artifact storage
       uses: actions/upload-artifact@v4
       with:
-        name: binary-helix-deb
+        name: helix-binary-deb
         path: deb/helix_*.deb
         compression-level: 0
 
     - name: Upload source tree to artifact storage
       uses: actions/upload-artifact@v4
       with:
-        name: source
+        name: helix-source
         path: helix.tar.zst
         compression-level: 0
