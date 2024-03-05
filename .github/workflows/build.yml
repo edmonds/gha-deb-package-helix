@@ -39,7 +39,7 @@ jobs:
     - name: Build helix
       working-directory: "./helix"
       run: |
-        rm -vf rust-toolchain.toml
+        rm -f rust-toolchain.toml
         cargo build --profile opt --ignore-rust-version
 
     - name: Prepare Debian packaging
@@ -48,11 +48,11 @@ jobs:
         echo "VERSION is $VERSION"
         mkdir -p deb/helix/opt/helix/bin
         mkdir -p deb/helix/opt/helix/runtime
-        cp -avl helix/target/opt/hx deb/helix/opt/helix/bin/
-        cp -avl helix/runtime/* deb/helix/opt/helix/runtime/
+        cp -al helix/target/opt/hx deb/helix/opt/helix/bin/
+        cp -al helix/runtime/* deb/helix/opt/helix/runtime/
         rm -rf deb/helix/opt/helix/runtime/grammars/sources/
         find deb/helix -name .gitkeep -delete
-        cp -av .packaging/debian deb/helix/
+        cp -a .packaging/debian deb/helix/
         sed \
           -e "s,%VERSION%,$VERSION,g" \
           -e "s/%USER%/$(whoami)/g" \
@@ -75,7 +75,7 @@ jobs:
     - name: Archive source tree
       run: |
         find helix -name .git -type d -print0 | xargs -0 rm -rf '{}'
-        tar -acvf helix.tar.zst helix/
+        tar -acf helix.tar.zst helix/
 
     - name: Upload Debian package to artifact storage
       uses: actions/upload-artifact@v4
